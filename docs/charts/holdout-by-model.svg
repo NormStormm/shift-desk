@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="400" viewBox="0 0 760 400" font-family="Helvetica, Arial, sans-serif">
+<rect width="760" height="400" fill="#ffffff"/>
+<text x="60" y="28" font-size="17" font-weight="bold" fill="#111">Held-out test (60 new requests): accuracy by model</text>
+<line x1="60" x2="740" y1="300.0" y2="300.0" stroke="#e5e7eb"/><text x="52" y="304.0" font-size="11" text-anchor="end" fill="#6b7280">50%</text>
+<line x1="60" x2="740" y1="250.0" y2="250.0" stroke="#e5e7eb"/><text x="52" y="254.0" font-size="11" text-anchor="end" fill="#6b7280">60%</text>
+<line x1="60" x2="740" y1="200.0" y2="200.0" stroke="#e5e7eb"/><text x="52" y="204.0" font-size="11" text-anchor="end" fill="#6b7280">70%</text>
+<line x1="60" x2="740" y1="150.0" y2="150.0" stroke="#e5e7eb"/><text x="52" y="154.0" font-size="11" text-anchor="end" fill="#6b7280">80%</text>
+<line x1="60" x2="740" y1="100.0" y2="100.0" stroke="#e5e7eb"/><text x="52" y="104.0" font-size="11" text-anchor="end" fill="#6b7280">90%</text>
+<line x1="60" x2="740" y1="50.0" y2="50.0" stroke="#e5e7eb"/><text x="52" y="54.0" font-size="11" text-anchor="end" fill="#6b7280">100%</text>
+<rect x="100.33333333333333" y="50.0" width="46" height="250.0" fill="#2563eb" rx="3"/>
+<text x="123.33333333333333" y="45.0" font-size="12" text-anchor="middle" fill="#111">100%</text>
+<rect x="150.33333333333331" y="75.0" width="46" height="225.0" fill="#f59e0b" rx="3"/>
+<text x="173.33333333333331" y="70.0" font-size="12" text-anchor="middle" fill="#111">95%</text>
+<rect x="200.33333333333331" y="100.0" width="46" height="200.0" fill="#10b981" rx="3"/>
+<text x="223.33333333333331" y="95.0" font-size="12" text-anchor="middle" fill="#111">90%</text>
+<text x="173.33333333333331" y="322" font-size="14" font-weight="bold" text-anchor="middle" fill="#111">Opus 5.5</text>
+<text x="173.33333333333331" y="340" font-size="12" text-anchor="middle" fill="#6b7280">$0.0098 / request · 2.4 s</text>
+<rect x="326.99999999999994" y="60.0" width="46" height="240.0" fill="#2563eb" rx="3"/>
+<text x="349.99999999999994" y="55.0" font-size="12" text-anchor="middle" fill="#111">98%</text>
+<rect x="376.99999999999994" y="65.0" width="46" height="235.0" fill="#f59e0b" rx="3"/>
+<text x="399.99999999999994" y="60.0" font-size="12" text-anchor="middle" fill="#111">97%</text>
+<rect x="426.99999999999994" y="135.0" width="46" height="165.0" fill="#10b981" rx="3"/>
+<text x="449.99999999999994" y="130.0" font-size="12" text-anchor="middle" fill="#111">83%</text>
+<text x="399.99999999999994" y="322" font-size="14" font-weight="bold" text-anchor="middle" fill="#111">Sonnet 5.5</text>
+<text x="399.99999999999994" y="340" font-size="12" text-anchor="middle" fill="#6b7280">$0.0049 / request · 1.9 s</text>
+<rect x="553.6666666666666" y="50.0" width="46" height="250.0" fill="#2563eb" rx="3"/>
+<text x="576.6666666666666" y="45.0" font-size="12" text-anchor="middle" fill="#111">100%</text>
+<rect x="603.6666666666666" y="85.0" width="46" height="215.0" fill="#f59e0b" rx="3"/>
+<text x="626.6666666666666" y="80.0" font-size="12" text-anchor="middle" fill="#111">93%</text>
+<rect x="653.6666666666666" y="85.0" width="46" height="215.0" fill="#10b981" rx="3"/>
+<text x="676.6666666666666" y="80.0" font-size="12" text-anchor="middle" fill="#111">93%</text>
+<text x="626.6666666666666" y="322" font-size="14" font-weight="bold" text-anchor="middle" fill="#111">Haiku 5.5</text>
+<text x="626.6666666666666" y="340" font-size="12" text-anchor="middle" fill="#6b7280">$0.0002 / request · 1.5 s</text>
+<rect x="60" y="374" width="12" height="12" fill="#2563eb" rx="2"/><text x="77" y="384" font-size="12" fill="#374151">Category</text>
+<rect x="170" y="374" width="12" height="12" fill="#f59e0b" rx="2"/><text x="187" y="384" font-size="12" fill="#374151">Urgency</text>
+<rect x="280" y="374" width="12" height="12" fill="#10b981" rx="2"/><text x="297" y="384" font-size="12" fill="#374151">Routing</text>
+<text x="740" y="384" font-size="11" text-anchor="end" fill="#9ca3af">y-axis starts at 50%</text></svg>

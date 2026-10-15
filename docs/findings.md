@@ -91,3 +91,12 @@ A real form submission ("water leaking from the ceiling onto the bed", room 905)
 - **Why:** When the Claude step fails, there is no summary. Those are exactly the tickets a person most needs to read.
 - **Fix:** Fall back to the first 70 characters of the guest's own message, marked "(no summary)".
 - **Verified:** (version `99a4…`) Both lines now show the guest's words, and Claude's note flags them for follow-up.
+
+## Held-out evaluation (Project 5)
+60 new requests, with the answer key frozen before any run, scored through the real workflow with three models. Opus 5.5: **100% category, 95% urgency, 90% routing**, all 13 emergencies kept URGENT, all 5 spam/attack/empty messages sent to a person. Most misses were over-caution (right team, confidence just under 0.75). Haiku 5.5 matched it at ~1/50th of the cost but under-rated one safety issue in every run. Full write-up: [eval-report.md](eval-report.md).
+
+## F9: An URGENT ticket in review isn't labeled URGENT (found by the held-out test)
+- **What happened:** H05 ("I smell gas near the kitchenette stove") came back URGENT, but at 0.7 confidence, so it was routed to review. The Duty Manager's email subject would read **[REVIEW]**, not [URGENT].
+- **Why:** The subject tag is chosen as URGENT only for AUTO tickets (`escalate` = AUTO and URGENT). The REVIEW path never checked urgency.
+- **Fix (not yet applied):** tag review tickets with their urgency, e.g. `[URGENT][REVIEW]`. This changes how the ticket is displayed, not how it's judged, so it doesn't affect the scores.
+- **Lesson:** Testing new inputs finds bugs in the plumbing, not just in the AI's judgment.

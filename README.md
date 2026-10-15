@@ -43,7 +43,9 @@ Made from ten years of restaurant and hotel operations, where overnight requests
 | Missed emergencies | none | **none** |
 | Cost per request | $0.0088 | **$0.0092** |
 
-The test set covers clear requests, emergencies, two problems in one message, a Japanese-language request, an angry guest asking for a manager, a prompt-injection attempt, spam, an empty message and a vague one. **Caveat:** run 2 is on the same 40 requests the prompt was tuned on. A held-out set is the next step.
+**Held-out test (Project 5):** on **60 new requests** the prompt had never seen, with the answer key frozen first: **100% category, 95% urgency, 90% routing**, every emergency kept URGENT, every spam or manipulation attempt sent to a person. Haiku matched it at ~1/50th of the cost but under-rated one safety issue in every run. **[Full evaluation and model comparison →](docs/eval-report.md)**
+
+The original 40-request test set covers clear requests, emergencies, two problems in one message, a Japanese-language request, an angry guest asking for a manager, a prompt-injection attempt, spam, an empty message and a vague one. **Caveat:** run 2 is on the same 40 requests the prompt was tuned on, which is why the held-out test above exists.
 
 **[See all 40 requests and Claude's answers in both runs →](eval/REPORT.md)**
 
