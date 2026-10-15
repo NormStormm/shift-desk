@@ -1,7 +1,9 @@
 // Sends every test request to the Shift Desk workflow and scores the answers.
 //
-//   node eval/run-tests.mjs                 # all 40 requests
+//   node eval/run-tests.mjs                 # all 40 requests (the set the prompt was tuned on)
 //   node eval/run-tests.mjs T03 T25         # just these
+//   node eval/run-tests.mjs --set holdout   # the 60 held-out requests (Project 5)
+//   node eval/run-tests.mjs --set holdout --model claude-haiku-5-5   # same, with another model
 //
 // Needs the workflow published in n8n (webhook: /webhook/shift-desk-test).
 // Writes eval/results/<timestamp>.json and .csv, and prints a scorecard.
@@ -33,11 +35,17 @@ const ALSO_ACCEPT = {
   T40: { urgency: ['NORMAL'] },                         // F4: guest wants it fixed during the stay
 };
 
-const cases = JSON.parse(fs.readFileSync(path.join(here, '..', 'test-data', 'requests.json'), 'utf8'));
-// --rescore <results.json>: re-grade a saved run with the current answer key (no requests sent, no cost).
-const rescoreIdx = process.argv.indexOf('--rescore');
-const rescoreFile = rescoreIdx > -1 ? process.argv[rescoreIdx + 1] : null;
-const only = rescoreFile ? [] : process.argv.slice(2);
+// Flags: --set <train|holdout>, --model <id> (test runs only; the workflow allows a fixed list),
+// --rescore <results.json> (re-grade a saved run with the current answer key: no requests sent, no cost).
+const args = process.argv.slice(2);
+const flag = (name) => { const i = args.indexOf(name); return i > -1 ? args.splice(i, 2)[1] : null; };
+const SET = flag('--set') || 'train';
+const MODEL = flag('--model');
+const rescoreFile = flag('--rescore');
+const SET_FILES = { train: 'requests.json', holdout: 'holdout.json' };
+if (!SET_FILES[SET]) { console.error('Unknown --set ' + SET); process.exit(1); }
+const cases = JSON.parse(fs.readFileSync(path.join(here, '..', 'test-data', SET_FILES[SET]), 'utf8'));
+const only = rescoreFile ? [] : args;
 const todo = only.length ? cases.filter((c) => only.includes(c.id)) : cases;
 
 async function send(c) {
@@ -46,7 +54,7 @@ async function send(c) {
     const r = await fetch(URL_, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ test_id: c.id, from: c.from, room: c.room, message: c.message }),
+      body: JSON.stringify({ test_id: c.id, from: c.from, room: c.room, message: c.message, ...(MODEL ? { model: MODEL } : {}) }),
     });
     const text = await r.text();
     let body;
@@ -60,7 +68,8 @@ async function send(c) {
 
 function score(c, got) {
   const exp = c.expected;
-  const alt = ALSO_ACCEPT[c.id] || {};
+  // Borderline answers that also count: from the list above (training set) or the case's own also_accept (held-out set).
+  const alt = { ...(ALSO_ACCEPT[c.id] || {}), ...(c.also_accept || {}) };
   const expectReview = !!exp.needs_review;
   const catOk = got.category === exp.category || (alt.category || []).includes(got.category);
   // F4: items that should go to human review don't use urgency for anything, so it isn't scored.
@@ -88,7 +97,7 @@ async function pool(items, n, fn) {
 const saved = rescoreFile ? JSON.parse(fs.readFileSync(rescoreFile, 'utf8')) : null;
 const savedGot = saved ? Object.fromEntries(saved.results.map((r) => [r.id, r.got])) : {};
 console.log(rescoreFile ? `Re-scoring ${rescoreFile} with the current answer key (no requests sent)…\n`
-                        : `Sending ${todo.length} requests to ${URL_} (${CONCURRENCY} at a time)…\n`);
+                        : `Sending ${todo.length} ${SET} requests to ${URL_}${MODEL ? ' with ' + MODEL : ''} (${CONCURRENCY} at a time)…\n`);
 const results = await pool(todo, CONCURRENCY, async (c) => {
   const got = rescoreFile ? (savedGot[c.id] || { error: 'missing from saved run' }) : await send(c);
   const s = got.error && !got.category ? { catOk: false, urgOk: false, routeOk: false } : score(c, got);
@@ -108,6 +117,7 @@ const lat = results.map((r) => r.got.latency_ms).filter(Boolean).sort((a, b) => 
 const median = lat.length ? lat[Math.floor(lat.length / 2)] : 0;
 
 console.log('\n──────── Scorecard ────────');
+console.log('Test set:           ', SET);
 console.log('Model:              ', model);
 console.log('Category correct:   ', pct('catOk'));
 console.log('Urgency correct:    ', pct('urgOk'));
@@ -120,10 +130,10 @@ console.log(`Median latency:      ${(median / 1000).toFixed(1)} s`);
 console.log(`Tokens:              ${tokensIn} in / ${tokensOut} out  ≈ $${cost.toFixed(3)} total, $${(cost / n).toFixed(4)} per request`);
 
 if (rescoreFile) process.exit(0);
-const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19) + (SET === 'train' ? '' : '-' + SET + '-' + model.replace('claude-', ''));
 const dir = path.join(here, 'results');
 fs.mkdirSync(dir, { recursive: true });
-fs.writeFileSync(path.join(dir, `${stamp}.json`), JSON.stringify({ model, cost, results }, null, 2));
+fs.writeFileSync(path.join(dir, `${stamp}.json`), JSON.stringify({ set: SET, model, cost, median_latency_ms: median, results }, null, 2));
 const csvEsc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 const header = ['id', 'expected_category', 'got_category', 'cat_ok', 'expected_urgency', 'got_urgency', 'urg_ok', 'route', 'route_ok', 'confidence', 'summary', 'urgency_note', 'review_reason', 'error'];
 const rows = results.map((r) => [r.id, r.expected.category, r.got.category, r.catOk, r.expected.urgency, r.got.urgency, r.urgOk,

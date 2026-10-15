@@ -13,6 +13,7 @@ import uuid
 HERE = pathlib.Path(__file__).parent
 CREDENTIAL = {"id": "3fle6UI1Gpukqi5G", "name": "Claude_ShiftDesk"}  # local n8n credential (no secret here)
 MODEL = "claude-opus-5-5"
+TEST_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]  # eval only, see NORMALIZE_JS
 
 CATEGORIES = ["MAINTENANCE", "HOUSEKEEPING", "FOOD_BEVERAGE", "FRONT_DESK", "BILLING", "SECURITY", "OTHER"]
 URGENCIES = ["URGENT", "HIGH", "NORMAL", "LOW"]
@@ -84,6 +85,10 @@ const ticketId = 'SD-' + stamp + '-' + Math.random().toString(36).slice(2, 6).to
 const simulate = clean(src.test_id) ? clean(src.simulate_failure) : '';
 if (simulate === 'crash') throw new Error('Simulated crash (test ' + clean(src.test_id) + ')');
 
+// Test runs only (Project 5 model comparison): try another model from a fixed list. Real requests always use __MODEL__.
+const TEST_MODELS = __TEST_MODELS__;
+const model = clean(src.test_id) && TEST_MODELS.includes(clean(src.model)) ? clean(src.model) : __MODEL__;
+
 let valid = true, invalidReason = '';
 if (!message) { valid = false; invalidReason = 'Empty message'; }
 const MAX = 2000;
@@ -114,7 +119,7 @@ return {
   valid,
   invalid_reason: invalidReason,
   claude_request: {
-    model: simulate === 'claude_error' ? 'claude-model-that-does-not-exist' : __MODEL__,
+    model: simulate === 'claude_error' ? 'claude-model-that-does-not-exist' : model,
     max_tokens: 2048,
     system: SYSTEM,
     output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
@@ -213,6 +218,7 @@ def js(code):
     return (code
             .replace("__SYSTEM__", json.dumps(SYSTEM_PROMPT))
             .replace("__SCHEMA__", json.dumps(OUTPUT_SCHEMA))
+            .replace("__TEST_MODELS__", json.dumps(TEST_MODELS))
             .replace("__MODEL__", json.dumps(MODEL))
             .replace("__CATEGORIES__", json.dumps(CATEGORIES))
             .replace("__URGENCIES__", json.dumps(URGENCIES))
