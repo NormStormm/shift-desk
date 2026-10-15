@@ -15,6 +15,24 @@ Made from ten years of restaurant and hotel operations, where overnight requests
 | **Shift handover** | At 3 pm and 11 pm: exact counts by team and urgency, plus a short Claude-written "what the next shift should know." |
 | **Measured** | 40-request test set: **100% category, 100% urgency, 100% routing, no missed emergencies**, median 2.1 s, **< 1¢ per request**. |
 
+### The main workflow in n8n
+![n8n canvas: form and webhook triggers, Claude triage, review path, team email, ticket log, problem check, alert](docs/screenshots/workflow-canvas.png)
+
+### What a team receives: URGENT ticket to Engineering, Duty Manager copied
+![URGENT email for a ceiling leak in room 905, with team, urgency, room, summary and the guest's original message](docs/screenshots/urgent-email.png)
+
+### Every ticket logged to Google Sheets
+![Tickets tab with ticket ID, time, room, category, team, urgency, confidence, route and email status](docs/screenshots/tickets-sheet.png)
+
+### Shift handover: exact counts plus a Claude-written note
+![Shift summary email: handover note, counts by team and urgency, urgent list, review list](docs/screenshots/shift-summary-email.png)
+*Taken before the F8 fix: the two review tickets (simulated Claude failures) now show the guest's own words instead of a blank summary.*
+
+### When something breaks: alert with the ticket details
+![Problem alert: the Claude step failed, the ticket went to the Duty Manager for review, and the original message is included](docs/screenshots/alert-email.png)
+
+*Email addresses in the screenshots are replaced with team names.*
+
 ## Results
 
 | | Run 1 | **Run 2** (after fixes) |
