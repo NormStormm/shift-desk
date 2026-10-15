@@ -1,0 +1,153 @@
+{
+  "name": "Shift Desk Alerts",
+  "id": "shiftDeskAlerts",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8e272ab4-c52b-50ef-887e-d79cbd39bef5",
+      "name": "Run Crashed",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "31de54a6-3934-5db8-b5b6-5e64ae81e12e",
+      "name": "Called by Shift Desk",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Turns either kind of failure into one plain-language alert.\nconst j = $input.first().json;\n\n// Hints for the failures we expect. Google sign-ins in Testing mode expire every 7 days.\nfunction hint(text) {\n  const s = String(text || '').toLowerCase();\n  if (s.includes('invalid_grant') || s.includes('unauthorized') || s.includes('401') || s.includes('token'))\n    return 'Looks like a Google or Claude sign-in problem. In n8n: Credentials > open the Google ones > Reconnect. (Google test sign-ins expire every 7 days.)';\n  if (s.includes('429') || s.includes('rate') || s.includes('overloaded') || s.includes('529'))\n    return 'A service is busy or rate-limiting. Usually clears on its own; watch for repeats.';\n  if (s.includes('model')) return 'The Claude model name was rejected. Check MODEL in build_stage1.py.';\n  return '';\n}\n\nlet subject, lines;\nif (j.execution || j.trigger) {\n  // From the Error Trigger: the whole run failed, so the request may not be logged anywhere.\n  const ex = j.execution || {};\n  const err = ex.error || (j.trigger && j.trigger.error) || {};\n  const where = ex.lastNodeExecuted || 'the trigger';\n  subject = '[SHIFT DESK DOWN] Run crashed at \"' + where + '\"';\n  lines = [\n    'A Shift Desk run crashed. The request may not have been logged or sent to any team.',\n    'Open the run below to see the guest message, then handle it by hand.',\n    '',\n    'Failed at:  ' + where,\n    'Error:      ' + (err.message || 'unknown'),\n    'Run:        ' + (ex.url || 'execution ' + ex.id) + (ex.mode ? '  (' + ex.mode + ')' : ''),\n  ];\n  const h = hint(err.message);\n  if (h) lines.push('', 'Likely fix: ' + h);\n} else {\n  // Called by Shift Desk: the ticket went through, but part of it failed.\n  const problems = j.problems || [];\n  subject = '[SHIFT DESK PROBLEM] ' + j.ticket_id + ': ' + (problems[0] || 'unknown problem');\n  lines = ['Ticket ' + j.ticket_id + ' went through, but:'];\n  for (const p of problems) lines.push('  - ' + p);\n  lines.push('',\n    'Team:      ' + j.team + '  (route ' + j.route + ')',\n    'Urgency:   ' + j.urgency,\n    'Room:      ' + (j.room || 'not given'),\n    'Summary:   ' + (j.summary || '(none)'),\n    '',\n    'Original message:', j.message || '(empty)');\n  const h = hint(problems.join(' '));\n  if (h) lines.push('', 'Likely fix: ' + h);\n  if (j.test_id) lines.push('', '(Test run ' + j.test_id + '.)');\n}\nlines.push('', '--', 'Shift Desk alerts. Demo system: all requests are fake test data.');\nreturn [{ json: { subject, body: lines.join('\\n') } }];"
+      },
+      "id": "a235750d-2dba-53ce-baf1-f34bfe41b4a7",
+      "name": "Describe Problem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "id": "361dcb96-ac0d-5d07-8d69-a6d796037c12",
+      "name": "Who Gets Alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        520,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hHZYU0Y0h6zkcnGv",
+          "name": "Gmail_ShiftDesk"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.emailAddress.replace('@', '+alerts@') }}",
+        "subject": "={{ $('Describe Problem').item.json.subject }}",
+        "emailType": "text",
+        "message": "={{ $('Describe Problem').item.json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Shift Desk Alerts"
+        }
+      },
+      "id": "432adf26-a38f-5cd7-9592-2241323097dd",
+      "name": "Email Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        780,
+        100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hHZYU0Y0h6zkcnGv",
+          "name": "Gmail_ShiftDesk"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run Crashed": {
+      "main": [
+        [
+          {
+            "node": "Describe Problem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Called by Shift Desk": {
+      "main": [
+        [
+          {
+            "node": "Describe Problem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Describe Problem": {
+      "main": [
+        [
+          {
+            "node": "Who Gets Alerts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Who Gets Alerts": {
+      "main": [
+        [
+          {
+            "node": "Email Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Pacific/Honolulu",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "pinData": {}
+}
