@@ -27,6 +27,8 @@ Made from ten years of restaurant and hotel operations, where overnight requests
 
 The test set covers clear requests, emergencies, two problems in one message, a Japanese-language request, an angry guest asking for a manager, a prompt-injection attempt, spam, an empty message and a vague one. **Caveat:** run 2 is on the same 40 requests the prompt was tuned on. A held-out set is the next step.
 
+**[See all 40 requests and Claude's answers in both runs →](eval/REPORT.md)**
+
 How the score went from 80% to 100%, and what else broke along the way, is in **[docs/findings.md](docs/findings.md)**: eight real failures, each with the cause, the fix and how it was verified.
 
 ## How it works
@@ -80,6 +82,6 @@ Needs: Node 20+, a [Claude API key](https://console.anthropic.com/), a Google ac
 5. **Build, import and publish** (alerts first, since the others point to it): see [Deploy](docs/runbook.md#deploy).
 6. **Test:** open `http://localhost:5678/form/shift-desk`, or run all 40 test requests with `node eval/run-tests.mjs`.
 
-📄 [Findings (what broke and why)](docs/findings.md) · [Runbook](docs/runbook.md) · [Test data](test-data/requests.json) · [Eval script](eval/run-tests.mjs)
+📄 [Findings (what broke and why)](docs/findings.md) · [Test results, all 40](eval/REPORT.md) · [Runbook](docs/runbook.md) · [Test data](test-data/requests.json) · [Eval script](eval/run-tests.mjs)
 
 *All requests, rooms and names are fake test data. No real hotel or guest data was used.*

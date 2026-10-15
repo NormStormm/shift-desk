@@ -81,6 +81,7 @@ If the latest run shows the old version, wait a few seconds and test again.
 | One request, by hand | `http://localhost:5678/form/shift-desk` (use a normal browser; embedded browsers can block the form, see F1) | ~1¢, sends a real team email |
 | All 40 test requests | `node eval/run-tests.mjs` (or `node eval/run-tests.mjs T03 T25` for a few) | ~37¢; logged to the sheet, **no emails** |
 | Re-grade an old run | `node eval/run-tests.mjs --rescore eval/results/<file>.json` | free |
+| Side-by-side report | `python3 eval/make_report.py eval/results/<run1>.json eval/results/<run2>.json` → `eval/REPORT.md` | free |
 | Shift summary now | `curl -X POST localhost:5678/webhook/shift-summary-test -H 'content-type: application/json' -d '{"hours":24,"include_tests":true,"send_email":true}'` | ~1¢ |
 | Crash alert | POST to `/webhook/shift-desk-test` with `"test_id":"X1","simulate_failure":"crash"` | free, sends an alert |
 | Quiet-failure alert | same, with `"simulate_failure":"claude_error"` | free, sends an alert |
