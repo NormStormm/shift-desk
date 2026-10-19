@@ -2,7 +2,7 @@
 
 **Guest and staff requests come in. Claude sorts each one by team and urgency, the ticket is logged to a Google Sheet, and the right team is emailed. Urgent issues copy the Duty Manager, unclear ones go to a person first, and the next shift gets a handover summary. Built with n8n, the Claude API, Google Sheets and Gmail.**
 
-Made from ten years of restaurant and hotel operations, where overnight requests arrive by phone, text and walk-up, get written on a notepad, and depend on one person knowing which department handles what.
+Made from ten years of serving guests in restaurants and hotels, where requests arrive by phone, text and walk-up, get written on a notepad, and depend on one person knowing which department handles what.
 
 | | |
 |---|---|
